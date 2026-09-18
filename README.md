@@ -1,5 +1,7 @@
 # jaeger-postgres
 
+[![Release](https://github.com/tsirysndr/jaeger-postgres/actions/workflows/release.yml/badge.svg)](https://github.com/tsirysndr/jaeger-postgres/actions/workflows/release.yml)
+
 PostgreSQL remote trace storage for Jaeger v2, implemented in Rust with Tonic,
 SQLx, and SeaQuery. One gRPC listener provides:
 
