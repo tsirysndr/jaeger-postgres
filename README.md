@@ -50,3 +50,34 @@ cargo build --release
 
 The migration is also available at `migrations/0001_create_spans.sql` for
 operators that manage DDL separately.
+
+## Install a release
+
+The installer detects macOS ARM64, Linux x86_64, or Linux ARM64 and verifies the
+download against the release checksums:
+
+```sh
+curl --proto '=https' --tlsv1.2 -LsSf \
+  https://raw.githubusercontent.com/tsirysndr/jaeger-postgres/main/install.sh | sh
+```
+
+A root Linux installation also places the unit at
+`/etc/systemd/system/jaeger-postgres.service` and creates a private environment
+file. Install system-wide, configure, and start it with:
+
+```sh
+curl --proto '=https' --tlsv1.2 -LsSf \
+  https://raw.githubusercontent.com/tsirysndr/jaeger-postgres/main/install.sh | sudo sh
+sudo editor /etc/jaeger-postgres/env
+sudo systemctl enable --now jaeger-postgres
+sudo systemctl status jaeger-postgres
+```
+
+The installer intentionally does not start the service until `DATABASE_URL` is
+configured. Set `JAEGER_POSTGRES_VERSION=v0.1.0` to install a particular tag,
+`INSTALL_DIR` to change the binary destination, or `INSTALL_SYSTEMD=0` to skip
+the unit.
+
+Tags matching `v*` trigger release builds for Darwin ARM64, Linux x86_64, and
+Linux ARM64. The workflow publishes all three archives and `SHA256SUMS` to the
+corresponding GitHub release.

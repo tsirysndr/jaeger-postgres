@@ -1,0 +1,31 @@
+[Unit]
+Description=Jaeger PostgreSQL remote storage
+Documentation=https://github.com/tsirysndr/jaeger-postgres
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+EnvironmentFile=/etc/jaeger-postgres/env
+ExecStart=/usr/local/bin/jaeger-postgres
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+
+# Service hardening
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictRealtime=yes
+SystemCallArchitectures=native
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
