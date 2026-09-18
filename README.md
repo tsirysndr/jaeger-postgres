@@ -22,6 +22,9 @@ cargo build --release
 ./target/release/jaeger-postgres
 ```
 
+After connecting to PostgreSQL and applying the schema, startup prints an ASCII
+banner with the configured gRPC address and the services sharing its port.
+
 Optional environment variables:
 
 | Variable | Default | Meaning |

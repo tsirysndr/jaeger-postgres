@@ -3,6 +3,7 @@ use std::{net::SocketAddr, time::Duration};
 use anyhow::Context;
 use clap::Parser;
 use jaeger_postgres::{
+    banner::startup_banner,
     config::Config,
     proto::storage::{
         dependency_reader_server::DependencyReaderServer, trace_reader_server::TraceReaderServer,
@@ -34,7 +35,8 @@ async fn main() -> anyhow::Result<()> {
     store.migrate().await?;
     let service = StorageServer::new(store);
 
-    tracing::info!(%address, "Jaeger PostgreSQL storage listening");
+    println!("{}", startup_banner(address));
+    tracing::info!(%address, "Jaeger PostgreSQL storage ready");
     Server::builder()
         .add_service(TraceServiceServer::new(service.clone()))
         .add_service(TraceReaderServer::new(service.clone()))
