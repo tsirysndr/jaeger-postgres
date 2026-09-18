@@ -34,6 +34,9 @@ Optional environment variables:
 | `MAX_SEARCH_DEPTH` | `1000` | Upper bound for a Jaeger trace search |
 | `RUST_LOG` | `jaeger_postgres=info` | Log filter |
 
+Every gRPC request emits a start event, a completion event with busy/idle
+timings, and an error event when the RPC fails. Request payloads are not logged.
+
 Point the Jaeger v2 remote-storage backend at port `17271` with insecure TLS for
 a local deployment. The backend implements the standard OTLP writer on that
 same endpoint, as required by the Jaeger storage v2 contract.

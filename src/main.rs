@@ -14,7 +14,7 @@ use jaeger_postgres::{
 use opentelemetry_proto::tonic::collector::trace::v1::trace_service_server::TraceServiceServer;
 use sqlx::postgres::PgPoolOptions;
 use tonic::transport::Server;
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{EnvFilter, fmt::format::FmtSpan};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -22,6 +22,7 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(
             EnvFilter::try_from_default_env().unwrap_or_else(|_| "jaeger_postgres=info".into()),
         )
+        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
         .init();
     let config = Config::parse();
     let address: SocketAddr = config.listen_addr.parse().context("parse LISTEN_ADDR")?;

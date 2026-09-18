@@ -59,6 +59,12 @@ impl StorageServer {
 
 #[tonic::async_trait]
 impl TraceService for StorageServer {
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "opentelemetry.proto.collector.trace.v1.TraceService/Export"),
+        err
+    )]
     async fn export(
         &self,
         request: Request<ExportTraceServiceRequest>,
@@ -83,6 +89,12 @@ impl TraceReader for StorageServer {
     type FindTracesStream = TraceStream;
     type FindTraceSummariesStream = SummaryStream;
 
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.TraceReader/GetTraces"),
+        err
+    )]
     async fn get_traces(
         &self,
         request: Request<GetTracesRequest>,
@@ -93,6 +105,12 @@ impl TraceReader for StorageServer {
             .await
     }
 
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.TraceReader/GetServices"),
+        err
+    )]
     async fn get_services(
         &self,
         _: Request<GetServicesRequest>,
@@ -102,6 +120,12 @@ impl TraceReader for StorageServer {
         }))
     }
 
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.TraceReader/GetOperations"),
+        err
+    )]
     async fn get_operations(
         &self,
         request: Request<GetOperationsRequest>,
@@ -119,6 +143,12 @@ impl TraceReader for StorageServer {
         }))
     }
 
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.TraceReader/FindTraces"),
+        err
+    )]
     async fn find_traces(
         &self,
         request: Request<FindTracesRequest>,
@@ -136,6 +166,12 @@ impl TraceReader for StorageServer {
             .await
     }
 
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.TraceReader/FindTraceIDs"),
+        err
+    )]
     async fn find_trace_i_ds(
         &self,
         request: Request<FindTraceIDsRequest>,
@@ -153,6 +189,12 @@ impl TraceReader for StorageServer {
         }))
     }
 
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.TraceReader/FindTraceSummaries"),
+        err
+    )]
     async fn find_trace_summaries(
         &self,
         request: Request<FindTraceSummariesRequest>,
@@ -177,6 +219,12 @@ impl TraceReader for StorageServer {
 
 #[tonic::async_trait]
 impl DependencyReader for StorageServer {
+    #[tracing::instrument(
+        name = "grpc_request",
+        skip_all,
+        fields(rpc = "jaeger.storage.v2.DependencyReader/GetDependencies"),
+        err
+    )]
     async fn get_dependencies(
         &self,
         request: Request<GetDependenciesRequest>,
