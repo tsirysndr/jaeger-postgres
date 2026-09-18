@@ -76,7 +76,7 @@ sudo systemctl status jaeger-postgres
 ```
 
 The installer intentionally does not start the service until `DATABASE_URL` is
-configured. Set `JAEGER_POSTGRES_VERSION=v0.1.0` to install a particular tag,
+configured. Set `JAEGER_POSTGRES_VERSION=v0.1.1` to install a particular tag,
 `INSTALL_DIR` to change the binary destination, or `INSTALL_SYSTEMD=0` to skip
 the unit.
 

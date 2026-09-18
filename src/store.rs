@@ -346,11 +346,15 @@ fn apply_query(
     if let Some(ts) = &query.start_time_max {
         select.and_where(Expr::col(Spans::StartTimeUnixNano).lt(timestamp_to_nanos(ts)?));
     }
-    if let Some(d) = &query.duration_min {
-        select.and_where(Expr::col(Spans::DurationNano).gte(duration_to_nanos(d)?));
+    // Jaeger sets both duration bounds on every query, leaving them at zero when
+    // the user asked for neither, so a present-but-zero bound has to mean unset:
+    // read literally, `duration_nano <= 0` matches no span and every search comes
+    // back empty.
+    if let Some(nanos) = duration_bound(query.duration_min.as_ref())? {
+        select.and_where(Expr::col(Spans::DurationNano).gte(nanos));
     }
-    if let Some(d) = &query.duration_max {
-        select.and_where(Expr::col(Spans::DurationNano).lte(duration_to_nanos(d)?));
+    if let Some(nanos) = duration_bound(query.duration_max.as_ref())? {
+        select.and_where(Expr::col(Spans::DurationNano).lte(nanos));
     }
     for attribute in &query.attributes {
         let needle =
@@ -524,6 +528,16 @@ pub fn timestamp_to_nanos(ts: &prost_types::Timestamp) -> Result<i64> {
         .and_then(|v| v.checked_add(ts.nanos as i64))
         .ok_or_else(|| anyhow!("timestamp is outside nanosecond range"))
 }
+fn duration_bound(d: Option<&prost_types::Duration>) -> Result<Option<i64>> {
+    match d {
+        Some(d) => Ok(match duration_to_nanos(d)? {
+            0 => None,
+            nanos => Some(nanos),
+        }),
+        None => Ok(None),
+    }
+}
+
 fn duration_to_nanos(d: &prost_types::Duration) -> Result<i64> {
     d.seconds
         .checked_mul(1_000_000_000)
@@ -653,5 +667,39 @@ mod tests {
         assert!(!sql.contains("OR true"));
         assert!(sql.contains("span_attributes @>"));
         assert_eq!(values.0.0.len(), 4);
+    }
+
+    fn duration_sql(
+        min: Option<prost_types::Duration>,
+        max: Option<prost_types::Duration>,
+    ) -> String {
+        let mut select = Query::select();
+        select.column(Spans::TraceId).from(Spans::Table);
+        let query = TraceQueryParameters {
+            duration_min: min,
+            duration_max: max,
+            ..Default::default()
+        };
+        apply_query(&mut select, &query).unwrap();
+        select.build_sqlx(PostgresQueryBuilder).0
+    }
+
+    #[test]
+    fn zero_duration_bounds_do_not_filter() {
+        let zero = prost_types::Duration::default();
+        let sql = duration_sql(Some(zero), Some(zero));
+        assert!(!sql.contains("duration_nano"), "got: {sql}");
+    }
+
+    #[test]
+    fn real_duration_bounds_still_filter() {
+        let sql = duration_sql(
+            None,
+            Some(prost_types::Duration {
+                seconds: 10,
+                nanos: 0,
+            }),
+        );
+        assert!(sql.contains("duration_nano"), "got: {sql}");
     }
 }

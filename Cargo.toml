@@ -1,6 +1,6 @@
 [package]
 name = "jaeger-postgres"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 description = "Jaeger v2 remote trace storage backed by PostgreSQL"
